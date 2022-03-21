@@ -49,14 +49,16 @@ const typeDefs = gql`
 		getUsers: [UserClient]
 		getCurrentUser(email: String, hash: String): UserClient
 		getEmailUserServer(email: String): User
-		getTweet(id: Int): Tweet
+		getTweet(tweet_id: Int): Tweet
 		getTweets(email: String, hash: String): [Tweet]
-		isYourTweet(id: Int, email: String, hash: String): Boolean
+		getUserTweets(user_id: Int): [Tweet]
+		isYourTweet(tweet_id: Int, email: String, hash: String): Boolean
 	}
 
 	type Mutation {
 		createUser(email: String, password: String): CreateUserOutput
 		updateUser(email: String, hash: String, firstName: String, lastName: String): UserClient
+		signInUser(email: String, password: String): CreateUserOutput
 		createTweet(email: String, hash: String, content: String): Tweet
 		deleteTweet(email: String, hash: String, id: Int): Boolean
 	}
@@ -89,11 +91,16 @@ const resolvers = {
 			const email = args.email
 			const hash  = args.hash
 			const result = await request_email_user_server(email)
-			const decoded = jwt.verify(hash, SECRET_KEY)
+			let decoded;
+			try {
+				decoded = jwt.verify(hash, SECRET_KEY)
+			} catch(error) {
+				return {}
+			}
 			// result.then((r) => {
 			const user_password_hash = result.data.data.getEmailUserServer.password
 			if ( user_password_hash == decoded.password ) {
-				return result.data.data.getEmailUserServer
+				return result.data.data.getEmailUserServer // Server でいいのか？
 			} else {
 				return {}
 			}
@@ -109,7 +116,7 @@ const resolvers = {
 			return user
 		},
 		getTweet: (root, args) => {
-			const tweet_id = args.id
+			const tweet_id = args.tweet_id
 			const tweet = tweets.find((t) => t.id == tweet_id)
 			console.log(tweet_id, tweet)
 			if (!tweet) {
@@ -120,8 +127,13 @@ const resolvers = {
 		getTweets: () => {
 			return tweets
 		},
+		getUserTweets: (root, args) => {
+			const user_id = args.user_id
+			const user_tweets = tweets.filter((t) => t.user_id == user_id)
+			return user_tweets
+		},
 		isYourTweet: async (root, args) => {
-			const tweet_id = args.id
+			const tweet_id = args.tweet_id
 			const email = args.email
 			const hash = args.hash
 			const user_result = await request_current_user(email, hash)
@@ -132,7 +144,7 @@ const resolvers = {
 			if (!tweet_result) {
 				return null
 			}
-			if (tweet_result.data.data.getTweet.id == user_result.data.data.getCurrentUser.id) {
+			if (tweet_result.data.data.getTweet.user_id == user_result.data.data.getCurrentUser.id) {
 				return true
 			} else {
 				return false
@@ -179,6 +191,25 @@ const resolvers = {
 			}
 				// })
 			// })
+		},
+		signInUser: async (root, args) => {
+			const email = args.email
+			const password = args.password
+			const result = await request_email_user_server(email)
+			const user = result.data.data.getEmailUserServer
+			if (user == null || user == undefined) {
+				return null
+			}
+			if (user.password != password) {
+				return null
+			}
+			const option = {
+				expiresIn: "30d"
+			}
+			const hashed_password = jwt.sign({password: password}, SECRET_KEY, option)
+			const user_output = {id: user.id, hashed_password, email: user.email}
+			console.log(user_output)
+			return user_output
 		},
 		createTweet: async (root, args) => {
 			const email = args.email
@@ -262,20 +293,20 @@ const request_current_user = (email, hash) => {
 	return result
 }
 
-const request_get_tweet = (id) => {
+const request_get_tweet = (tweet_id) => {
 	const result = axios({
 		url: "http://localhost:4000/graphql",
 		method: "POST",
 		data: {
 			query: `
-				query ($id: Int) {
-					getTweet(id: $id) {
+				query ($tweet_id: Int) {
+					getTweet(tweet_id: $tweet_id) {
 						id
 						content
 						user_id
 					}
 				}`,
-			variables: {id}
+			variables: {tweet_id}
 		}
 	})
 	return result

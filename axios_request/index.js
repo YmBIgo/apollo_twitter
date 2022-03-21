@@ -104,7 +104,7 @@ import axios from "axios"
 // 		}`,
 // 		variables: {
 // 			email: "IgYmb0218LP@gmail.com",
-// 			hash: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXNzd29yZCI6ImhvZ2Vob2dlIiwiaWF0IjoxNjQ3MzUzNTcyLCJleHAiOjE2NDk5NDU1NzJ9.H-BznT-f3pjH3z8RskfvWS4SABrgv3TJNeBmP0Vxb8M"
+// 			hash: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXNzd29yZCI6ImhvZ2Vob2dlIiwiaWF0IjoxNjQ3ODQ0NDc0LCJleHAiOjE2NTA0MzY0NzR9.oLQEGXy3rkXmNwkyYfOe1ce25V_2xOIaWUHM1R1jdf8"
 // 		}
 // 	}
 // })
@@ -164,6 +164,32 @@ import axios from "axios"
 // 	console.log(result.data.data)
 // })
 
+// [ Sign In User API ]
+
+// const user_sign_in_request = axios({
+// 	url: "http://localhost:4000/graphql",
+// 	method: "POST",
+// 	data: {
+// 		query: `
+// 			mutation ($email: String, $password: String) {
+// 				signInUser(email: $email, password: $password) {
+// 					id
+// 					email
+// 					hashed_password
+// 				}
+// 			}
+// 		`,
+// 		variables: {
+// 			email: "IgYmb0218LP@gmail.com",
+// 			password: "hogehoge"
+// 		}
+// 	}
+// })
+
+// user_sign_in_request.then((result) => {
+// 	console.log(result.data.data)
+// })
+
 // [ Create Tweet API ]
 
 // const create_tweet_request = axios({
@@ -181,7 +207,7 @@ import axios from "axios"
 // 		`,
 // 		variables: {
 // 			email: "IgYmb0218LP@gmail.com",
-// 			hash: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXNzd29yZCI6ImhvZ2Vob2dlIiwiaWF0IjoxNjQ3MzYwMTE5LCJleHAiOjE2NDk5NTIxMTl9.gcGWL8ZDJCEBSw86NAw7Dt3waFlR8kBTz_2Lkw6jWD4",
+// 			hash: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXNzd29yZCI6ImhvZ2Vob2dlIiwiaWF0IjoxNjQ3NzgxMDM3LCJleHAiOjE2NTAzNzMwMzd9.QmKD9fo7IekyKP9h9MtwiunEdmNHqveiBPTupbg6_ik",
 // 			content: "hello world!"
 // 		}
 // 	}
@@ -198,14 +224,14 @@ import axios from "axios"
 // 	method: "POST",
 // 	data: {
 // 		query: `
-// 			query ($id: Int) {
-// 				getTweet(id: $id) {
+// 			query ($tweet_id: Int) {
+// 				getTweet(tweet_id: $tweet_id) {
 // 					id
 // 					content
 // 					user_id
 // 				}
 // 			}`,
-// 		variables: {id: 1}
+// 		variables: {tweet_id: 1}
 // 	}
 // })
 
@@ -242,14 +268,14 @@ import axios from "axios"
 // 	method: "POST",
 // 	data: {
 // 		query: `
-// 			query ($id: Int, $email: String, $hash: String) {
-// 				isYourTweet (id: $id, email: $email, hash: $hash)
+// 			query ($tweet_id: Int, $email: String, $hash: String) {
+// 				isYourTweet (tweet_id: $tweet_id, email: $email, hash: $hash)
 // 			}
 // 		`,
 // 		variables: {
 // 			email: "IgYmb0218LP@gmail.com",
-// 			hash: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXNzd29yZCI6ImhvZ2Vob2dlIiwiaWF0IjoxNjQ3MzU5NzI2LCJleHAiOjE2NDk5NTE3MjZ9.cb5hL01d4GKIHaV59PE6fzC4MJ3INQgBh8gwng4F4JM",
-// 			id: 1
+// 			hash: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXNzd29yZCI6ImhvZ2Vob2dlIiwiaWF0IjoxNjQ3NzgwNjk4LCJleHAiOjE2NTAzNzI2OTh9.iWpi_7gV5UnZ3bicRSEqEFb-mQk_pzmQF8RUKwoSVsA",
+// 			tweet_id: 1
 // 		}
 // 	}
 // })
@@ -279,4 +305,26 @@ import axios from "axios"
 
 // delete_tweet_request.then((result) => {
 // 	console.log(result.data)
+// })
+
+// [ Get User Tweet API ]
+
+// const get_user1_tweets_request = axios({
+// 	url: "http://localhost:4000/graphql",
+// 	method: "POST",
+// 	data: {
+// 		query: `
+// 			query ($user_id: Int) {
+// 				getUserTweets(user_id: $user_id) {
+// 					id
+// 					user_id
+// 					content
+// 				}
+// 			}`
+// 		, variables: { user_id: 1 }
+// 	}
+// })
+
+// get_user1_tweets_request.then((result) => {
+// 	console.log(result.data.data)
 // })
