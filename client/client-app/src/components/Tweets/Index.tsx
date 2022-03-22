@@ -35,9 +35,9 @@ const Index: React.FC<Props> = () => {
 			<h1>Tweet Index</h1>
 			<p>Hello {current_user_data.getCurrentUser.email} </p>
 			<div className="tweet_timeline">
-				{tweets_data!.getTweets.map((tweet) => {
+				{tweets_data!.getTweets.map((tweet, idx) => {
 					return(
-						<TweetComponent id={tweet.id} user_id={tweet.user_id} content={tweet.content} />
+						<TweetComponent id={tweet.id} user_id={tweet.user_id} content={tweet.content} key={idx} />
 					)
 				})}
 			</div>

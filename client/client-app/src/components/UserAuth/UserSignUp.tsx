@@ -34,6 +34,7 @@ const UserSignUp: React.FC<Props> = () => {
 		<>
 			<div>You are already sign In</div>
 			<div>Go explore your next!</div>
+			<Link to="/">Top Page</Link>
 		</>
 	)
 

@@ -20,6 +20,16 @@ export const GET_TWEETS = gql`
 	}
 `
 
+export const GET_USER_TWEETS = gql`
+	query ($user_id: Int) {
+		getUserTweets (user_id: $user_id) {
+			id
+			user_id
+			content
+		}
+	}
+`
+
 export const CREATE_TWEET = gql`
 	mutation ($email: String, $hash: String, $content: String) {
 		createTweet(email: $email, hash: $hash, content: $content) {
