@@ -36,6 +36,7 @@ import axios from "axios"
 // 		`query {
 // 			getUsers {
 // 				id
+// 				email
 // 			}
 // 		}`
 // 	}

@@ -21,7 +21,7 @@ export const GET_USERS = gql`
 `
 
 export const UPDATE_USER = gql`
-	query ($email: String, $hash: String, $firstName: String, $lastName: String) {
+	mutation ($email: String, $hash: String, $firstName: String, $lastName: String) {
 		updateUser(email: $email, hash: $hash, firstName: $firstName, lastName: $lastName) {
 			id
 			email

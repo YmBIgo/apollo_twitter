@@ -18,3 +18,13 @@ export const USER_SIGN_UP = gql`
 		}
 	}
 `
+
+export const USER_SIGN_IN = gql`
+	mutation ($email: String, $password: String) {
+		signInUser (email: $email, password: $password) {
+			id
+			email
+			hashed_password
+		}
+	}
+`

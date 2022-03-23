@@ -29,7 +29,7 @@ const Show: React.FC<Props> = () => {
 		if (tweet_data && tweet_data.getTweet) {
 			getUserQuery({variables: {id: Number(tweet_data.getTweet.user_id)}})
 		}
-	}, [user_data])
+	}, [tweet_data])
 
 	if (tweet_error) return <div>{tweet_error.message}</div>
 	if (tweet_loading) return <div>loading...</div>

@@ -4,7 +4,8 @@ import {Link, useNavigate} from "react-router-dom"
 
 import {CURRENT_USER, USER_SIGN_UP} from "../../query/user_auth_queries"
 
-import {CurrentUserData, UserVars} from "../../type/user_auth"
+import {CurrentUserData, CurrentUserVars,
+		SignUpUserData, UserSignInUpVar} from "../../type/user_auth"
 
 import "../../css/user_auth.css"
 
@@ -17,16 +18,32 @@ const UserSignUp: React.FC<Props> = () => {
 	const [email, setEmail] = useState<string>("")
 	const [password, setPassword] = useState<string>("")
 
-	const [user_sign_up] = useMutation(USER_SIGN_UP)
+	const [user_sign_up] = useMutation<SignUpUserData, UserSignInUpVar>(USER_SIGN_UP)
 
 	const navigate = useNavigate()
 
 	const ls_email = localStorage.getItem("email") || ""
 	const ls_hash  = localStorage.getItem("hash") || ""
 
-	const {loading, error, data} = useQuery<CurrentUserData, UserVars>(CURRENT_USER, {
+	const {loading, error, data} = useQuery<CurrentUserData, CurrentUserVars>(CURRENT_USER, {
 		variables: { email: ls_email, hash: ls_hash }
 	})
+
+	const userSignUp = () => {
+		const userSignUpData = user_sign_up({variables: {email, password}})
+		// localStorage.setItem("email", email)
+		userSignUpData.then((result) => {
+			// console.log(result!.data!.createUser)
+			if (result && result.data &&
+				result.data.createUser) {
+				localStorage.setItem("email", result.data.createUser.email)
+				localStorage.setItem("hash", result.data.createUser.hashed_password)
+				setEmail("")
+				setPassword("")
+				navigate("/")
+			}
+		})
+	}
 
 	if (error) return <div>{error.message}</div>
 	if (loading) return <div>loading...</div>
@@ -34,22 +51,8 @@ const UserSignUp: React.FC<Props> = () => {
 		<>
 			<div>You are already sign In</div>
 			<div>Go explore your next!</div>
-			<Link to="/">Top Page</Link>
 		</>
 	)
-
-	const userSignUp = () => {
-		const userSignUpData = user_sign_up({variables: {email, password}})
-		// localStorage.setItem("email", email)
-		userSignUpData.then((result) => {
-			console.log(result.data.createUser)
-			localStorage.setItem("email", result.data.createUser.email)
-			localStorage.setItem("hash", result.data.createUser.hashed_password)
-			setEmail("")
-			setPassword("")
-			navigate("/")
-		})
-	}
 
 	return (
 		<>
@@ -66,8 +69,7 @@ const UserSignUp: React.FC<Props> = () => {
 			<br />
 			<button className="btn btn-primary" onClick={userSignUp}>Send</button>
 			<br />
-			<Link to="/user/sign_in">Sign In</Link>
-        	<Link to="/user/sign_up">Sign Up</Link>
+			<Link to="/users/sign_in">Sign In</Link>
 		</>
 	)
 }
