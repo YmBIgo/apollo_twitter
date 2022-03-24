@@ -7,6 +7,7 @@ export const GET_USER = gql`
 			email
 			firstName
 			lastName
+			image_url
 		}
 	}
 `
@@ -16,6 +17,7 @@ export const GET_USERS = gql`
 		getUsers {
 			id
 			email
+			image_url
 		}
 	}
 `
@@ -27,6 +29,16 @@ export const UPDATE_USER = gql`
 			email
 			firstName
 			lastName
+			image_url
+		}
+	}
+`
+
+export const UPLOAD_USER_IMAGE = gql`
+	mutation ($file: Upload!, $email: String, $hash: String) {
+		uploadUserImage(file: $file, email: $email, hash: $hash) {
+			fileName
+			fileUrl
 		}
 	}
 `

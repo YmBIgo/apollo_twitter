@@ -1,4 +1,4 @@
-import React from "react"
+import React, {useState, useEffect} from "react"
 import {useQuery} from "@apollo/react-hooks"
 import {useParams} from "react-router-dom"
 
@@ -10,6 +10,8 @@ import {GET_USER_TWEETS} from "../../query/tweet_queries"
 import {GetUserData, UserVars} from "../../type/user"
 import {GetUserTweetsData, UserTweetVars} from "../../type/tweet"
 
+import "../../css/user.css"
+
 type Props = {
 
 }
@@ -17,6 +19,7 @@ type Props = {
 const Show: React.FC<Props> = () => {
 
 	const {user_id} = useParams<{user_id: string}>()
+	const [userImage, setUserImage] = useState<string>("")
 
 	const {data: user_data, loading: user_loading, error: user_error} = useQuery<GetUserData, UserVars>(GET_USER, {
 		variables: {id: Number(user_id)}
@@ -26,6 +29,12 @@ const Show: React.FC<Props> = () => {
 		variables: {user_id: Number(user_id)}
 	})
 
+	useEffect(() => {
+		if (user_data && user_data.getUser) {
+			setUserImage(user_data.getUser.image_url)
+		}
+	}, [user_data])
+
 	if (user_loading) return <div>loading...</div>
 	if (user_error) return <div>user error : {user_error.message}</div>
 
@@ -33,12 +42,25 @@ const Show: React.FC<Props> = () => {
 
 	return(
 		<>
-			<h1>
-				ID: {user_data!.getUser.id}
-				{user_data!.getUser.firstName} {user_data!.getUser.lastName}
-				<br />
-				{user_data!.getUser.email}
-			</h1>
+			<div className="row">
+				<div className="col-1">
+					<img src={userImage} className="user_image_small"
+						style={{margin: "30px 0"}}
+					/>
+				</div>
+				<div className="col-11">
+					<h1>
+						{ (user_data && user_data.getUser) &&
+							<>
+								ID: {user_data!.getUser.id}
+								{user_data!.getUser.firstName} {user_data!.getUser.lastName}
+								<br />
+								{user_data!.getUser.email}
+							</>
+						}
+					</h1>
+				</div>
+			</div>
 			<hr />
 			<div className="tweet_timeline">
 				{ tweet_data &&

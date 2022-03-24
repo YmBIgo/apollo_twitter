@@ -7,6 +7,8 @@ import {GET_USER} from "../../query/user_queries"
 
 import {} from "../../type/user"
 
+import "../../css/user.css"
+
 type Props = {
 
 }
@@ -15,6 +17,7 @@ const Show: React.FC<Props> = () => {
 
 	const {tweet_id} = useParams<{tweet_id: string}>()
 	const [userPath, setUserPath] = useState<string>("")
+	const [userImage, setUserImage] = useState<string>("")
 
 	const {data: tweet_data, loading: tweet_loading, error: tweet_error} = useQuery(GET_TWEET,{
 		variables: {tweet_id: Number(tweet_id)},
@@ -31,6 +34,13 @@ const Show: React.FC<Props> = () => {
 		}
 	}, [tweet_data])
 
+	useEffect(() => {
+		if (user_data && user_data.getUser &&
+			user_data.getUser.image_url) {
+			setUserImage(user_data.getUser.image_url)
+		}
+	}, [user_data])
+
 	if (tweet_error) return <div>{tweet_error.message}</div>
 	if (tweet_loading) return <div>loading...</div>
 	// if (user_error) return <div>{user_error.message}</div>
@@ -39,7 +49,7 @@ const Show: React.FC<Props> = () => {
 	return(
 		<>
 			<p>
-			Tweeted by {" "}
+			<img src={userImage} className="user_image_small" />
 			<Link to={userPath}>
 				{
 				user_data &&

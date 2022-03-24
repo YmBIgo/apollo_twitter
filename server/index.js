@@ -1,6 +1,10 @@
-import {ApolloServer, gql, UserInputError} from "apollo-server"
+import {ApolloServer, gql} from 'apollo-server-express' // UserInputError
+import {GraphQLUpload,
+		graphqlUploadExpress} from "graphql-upload"
 import jwt from "jsonwebtoken"
 import axios from "axios"
+import express from "express"
+import {Storage} from "@google-cloud/storage"
 
 let users = []
 let user_id = 1
@@ -9,11 +13,16 @@ let tweet_id = 1
 
 const SECRET_KEY = process.env.TUTORIAL_SECRET_KEY
 
+const projectId = "storageapi-334003"
+const keyFilename = "./auth/storageapi-334003-ae1dbe77d032.json"
+const storage = new Storage({projectId, keyFilename})
+
 const typeDefs = gql`
 	type User {
 		id: ID
 		firstName: String
 		lastName: String
+		image_url: String
 		email: String
 		password: String
 		created_at: Date
@@ -24,6 +33,7 @@ const typeDefs = gql`
 		id: ID
 		firstName: String
 		lastName: String
+		image_url: String
 		email: String
 		created_at: Date
 		updated_at: Date
@@ -43,6 +53,11 @@ const typeDefs = gql`
 		updated_at: Date
 	}
 
+	type File {
+		fileName: String
+		fileUrl: String
+	}
+
 	type Query {
 		getUser(id: Int): UserClient
 		getEmailUser(email: String): UserClient
@@ -58,15 +73,20 @@ const typeDefs = gql`
 	type Mutation {
 		createUser(email: String, password: String): CreateUserOutput
 		updateUser(email: String, hash: String, firstName: String, lastName: String): UserClient
+		uploadUserImage(email: String, hash: String, file: Upload): File
 		signInUser(email: String, password: String): CreateUserOutput
 		createTweet(email: String, hash: String, content: String): Tweet
 		deleteTweet(email: String, hash: String, id: Int): Boolean
 	}
 
 	scalar Date
+	scalar Upload
 `
 
 const resolvers = {
+
+	Upload: GraphQLUpload,
+
 	Query: {
 		getUser: (root, args) => {
 			const user = users.find((u) => u.id === args.id)
@@ -189,8 +209,22 @@ const resolvers = {
 				users = users.map((u) => u.email == email ? user : u)
 				return user
 			}
-				// })
-			// })
+		},
+		uploadUserImage : async (root, {file, email, hash}) => {
+			const result = await request_current_user(email, hash)
+			if (result.data.data.getCurrentUser == null || result.data.data.getCurrentUser == undefined) {
+				return null 
+			}
+			const user = users.find((u) => u.email == email)
+			const { createReadStream, filename, mimetype, encording } = await file
+			const bucket = storage.bucket("apollo_twitter")
+			const file_path = user.id + "/" + filename
+			await createReadStream().pipe(bucket.file(file_path).createWriteStream({}))
+			const fileUrl = "https://storage.googleapis.com/apollo_twitter/" + file_path
+			const file_output = {fileName: filename, fileUrl}
+			user.image_url = fileUrl
+			users = users.map((u) => u.id == user.id ? user : u)
+			return file_output
 		},
 		signInUser: async (root, args) => {
 			const email = args.email
@@ -312,11 +346,24 @@ const request_get_tweet = (tweet_id) => {
 	return result
 }
 
-const server = new ApolloServer({
-	typeDefs,
-	resolvers,
-})
+async function startServer() {
+	const server = new ApolloServer({
+		typeDefs,
+		resolvers,
+		uploads: {
+	        maxFileSize: 10000000,
+	        maxFiles: 20
+	    },
+	})
+	await server.start()
 
-server.listen().then(({url}) => {
-	console.log(`Server ready at ${url}`)
-})
+	const app = express()
+	app.use(graphqlUploadExpress())
+
+	server.applyMiddleware({app})
+
+	await new Promise(r => app.listen({ port: 4000 }, r));
+	console.log("Server ready at http://localhost:4000")
+}
+
+startServer()

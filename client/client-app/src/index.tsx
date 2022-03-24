@@ -3,13 +3,17 @@ import ReactDOM from 'react-dom';
 import {ApolloClient,
         InMemoryCache,
         ApolloProvider} from "@apollo/client"
+import { createUploadLink } from "apollo-upload-client";
 
 import './index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import App from './App';
 
 const client = new ApolloClient({
-  uri: "http://localhost:4000/graphql",
+  //@ts-ignore
+  link: createUploadLink({
+    uri: "http://localhost:4000/graphql"
+  }),
   cache: new InMemoryCache()
 });
 

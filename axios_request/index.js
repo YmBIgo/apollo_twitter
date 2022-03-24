@@ -191,6 +191,8 @@ import axios from "axios"
 // 	console.log(result.data.data)
 // })
 
+// [ Upload User Image API ]
+
 // [ Create Tweet API ]
 
 // const create_tweet_request = axios({

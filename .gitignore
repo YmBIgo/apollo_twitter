@@ -1,2 +1,3 @@
 server/node_modules
+server/auth
 axios_request/node_modules
