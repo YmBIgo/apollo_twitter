@@ -6,6 +6,10 @@ import axios from "axios"
 import express from "express"
 import {Storage} from "@google-cloud/storage"
 
+import {User} from "./db/models/User"
+import {Tweet} from "./db/models/Tweet"
+import {getDB} from "./db"
+
 let users = []
 let user_id = 1
 let tweets = []
@@ -16,6 +20,10 @@ const SECRET_KEY = process.env.TUTORIAL_SECRET_KEY
 const projectId = "storageapi-334003"
 const keyFilename = "./auth/storageapi-334003-ae1dbe77d032.json"
 const storage = new Storage({projectId, keyFilename})
+
+const boot = async () => {
+
+const store = await getDB() 
 
 const typeDefs = gql`
 	type User {
@@ -104,8 +112,9 @@ const resolvers = {
 			}
 			return user
 		},
-		getUsers: () => {
+		getUsers: (args, root, {dataSources}) => {
 			return users
+			// return await dataSources.User.findAll()
 		},
 		getCurrentUser: async (root, args) => {
 			const email = args.email
@@ -350,6 +359,10 @@ async function startServer() {
 	const server = new ApolloServer({
 		typeDefs,
 		resolvers,
+		dataSources: () => ({
+			User: new User({store}),
+			Tweet: new Tweet({store}),
+		}),
 		uploads: {
 	        maxFileSize: 10000000,
 	        maxFiles: 20
@@ -367,3 +380,7 @@ async function startServer() {
 }
 
 startServer()
+
+}
+
+boot()

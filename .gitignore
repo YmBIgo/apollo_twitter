@@ -1,3 +1,4 @@
 server/node_modules
 server/auth
+server/db/sqlite
 axios_request/node_modules
