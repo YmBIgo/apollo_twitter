@@ -16,7 +16,7 @@ import axios from "axios"
 // 		}`,
 // 		variables:
 // 		{
-// 			email: "IgYmb0218LP@gmail.com",
+// 			email: "test@test.com",
 // 			password: "hogehoge"
 // 		}
 // 	}
@@ -104,8 +104,8 @@ import axios from "axios"
 // 			}
 // 		}`,
 // 		variables: {
-// 			email: "IgYmb0218LP@gmail.com",
-// 			hash: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXNzd29yZCI6ImhvZ2Vob2dlIiwiaWF0IjoxNjQ3ODQ0NDc0LCJleHAiOjE2NTA0MzY0NzR9.oLQEGXy3rkXmNwkyYfOe1ce25V_2xOIaWUHM1R1jdf8"
+// 			email: "test@test.com",
+// 			hash: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXNzd29yZCI6ImhvZ2Vob2dlIiwiaWF0IjoxNjQ4MjEzMDA0LCJleHAiOjE2NTA4MDUwMDR9.YHQzeMItvOoIfYcOwgjAClafaNHcP-0_sSmj2i90CvE"
 // 		}
 // 	}
 // })
@@ -128,7 +128,7 @@ import axios from "axios"
 // 					password
 // 				}
 // 			}`,
-// 		variables: {email: "IgYmb0218LP@gmail.com"}
+// 		variables: {email: "test@test.com"}
 // 	}
 // })
 
@@ -153,8 +153,8 @@ import axios from "axios"
 // 			}
 // 		`,
 // 		variables: {
-// 			email: "IgYmb0218LP@gmail.com",
-// 			hash: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXNzd29yZCI6ImhvZ2Vob2dlIiwiaWF0IjoxNjQ3MzUzOTg5LCJleHAiOjE2NDk5NDU5ODl9.vCq15Qd40Ihzk9ezgEi-RXRF9hFGG94iP44NYLhhHug",
+// 			email: "test@test.com",
+// 			hash: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXNzd29yZCI6ImhvZ2Vob2dlIiwiaWF0IjoxNjQ4MjEzMDA0LCJleHAiOjE2NTA4MDUwMDR9.YHQzeMItvOoIfYcOwgjAClafaNHcP-0_sSmj2i90CvE",
 // 			firstName: "kazuya",
 // 			lastName: "kurihara"
 // 		}
@@ -209,8 +209,8 @@ import axios from "axios"
 // 			}
 // 		`,
 // 		variables: {
-// 			email: "IgYmb0218LP@gmail.com",
-// 			hash: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXNzd29yZCI6ImhvZ2Vob2dlIiwiaWF0IjoxNjQ3NzgxMDM3LCJleHAiOjE2NTAzNzMwMzd9.QmKD9fo7IekyKP9h9MtwiunEdmNHqveiBPTupbg6_ik",
+// 			email: "test@test.com",
+// 			hash: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXNzd29yZCI6ImhvZ2Vob2dlIiwiaWF0IjoxNjQ4MjEzMDA0LCJleHAiOjE2NTA4MDUwMDR9.YHQzeMItvOoIfYcOwgjAClafaNHcP-0_sSmj2i90CvE",
 // 			content: "hello world!"
 // 		}
 // 	}

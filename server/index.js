@@ -6,14 +6,14 @@ import axios from "axios"
 import express from "express"
 import {Storage} from "@google-cloud/storage"
 
-import {User} from "./db/models/User"
-import {Tweet} from "./db/models/Tweet"
-import {getDB} from "./db"
+import {User} from "./db/models/User.js"
+import {Tweet} from "./db/models/Tweet.js"
+import {getDB} from "./db/index.js"
 
-let users = []
-let user_id = 1
-let tweets = []
-let tweet_id = 1
+// let users = []
+// let user_id = 1
+// let tweets = []
+// let tweet_id = 1
 
 const SECRET_KEY = process.env.TUTORIAL_SECRET_KEY
 
@@ -96,24 +96,30 @@ const resolvers = {
 	Upload: GraphQLUpload,
 
 	Query: {
-		getUser: (root, args) => {
-			const user = users.find((u) => u.id === args.id)
+		getUser: async (root, args, {dataSources}) => {
+			const id = args.id
+			const user = await dataSources.User.findById(id)
+			// const user = users.find((u) => u.id === args.id)
 			if (!user) {
 				// throw new UserInputError("user id not found")
 				return null
 			}
-			return user
+			return user.dataValues
 		},
-		getEmailUser: (root, args) => {
-			const user = users.find((u) => u.email === args.email)
+		getEmailUser: async (root, args, {dataSources}) => {
+			const email = args.email
+			const user = await dataSources.User.findByEmail(email)
+			// const user = users.find((u) => u.email === args.email)
 			if (!user) {
 				// throw new UserInputError("user id not found")
 				return null
 			}
-			return user
+			return user.dataValues
 		},
-		getUsers: (args, root, {dataSources}) => {
-			return users
+		getUsers: async (args, root, {dataSources}) => {
+			const users = await dataSources.User.findAll()
+			const users_result = users.map((u) => u.dataValues)
+			return users_result
 			// return await dataSources.User.findAll()
 		},
 		getCurrentUser: async (root, args) => {
@@ -135,30 +141,35 @@ const resolvers = {
 			}
 			// })
 		},
-		getEmailUserServer: (root, args) => {
+		getEmailUserServer: async (root, args, {dataSources}) => {
 			const email = args.email
-			const user = users.find((u) => u.email === email)
+			// const user = users.find((u) => u.email === email)
+			const user = await dataSources.User.findByEmail(email)
 			if (!user) {
 				// throw new UserInputError("user id not found")
 				return null
 			}
-			return user
+			return user.dataValues
 		},
-		getTweet: (root, args) => {
+		getTweet: async (root, args, {dataSources}) => {
 			const tweet_id = args.tweet_id
-			const tweet = tweets.find((t) => t.id == tweet_id)
-			console.log(tweet_id, tweet)
+			// const tweet = tweets.find((t) => t.id == tweet_id)
+			const tweet = await dataSources.Tweet.findById(tweet_id)
 			if (!tweet) {
 				return null
 			}
-			return tweet
+			return tweet.dataValues
 		},
-		getTweets: () => {
-			return tweets
+		getTweets: async (root, args, {dataSources}) => {
+			const tweets = await dataSources.Tweet.findAll()
+			const tweets_result = tweets.map((t) => t.dataValues)
+			return tweets_result
 		},
-		getUserTweets: (root, args) => {
+		getUserTweets: async (root, args, {dataSources}) => {
 			const user_id = args.user_id
-			const user_tweets = tweets.filter((t) => t.user_id == user_id)
+			// const user_tweets = tweets.filter((t) => t.user_id == user_id)
+			const user_tweets = await dataSources.Tweet.findByUserId(user_id)
+			const user_tweets_result = user_tweets.map((t) => t.dataValues)
 			return user_tweets
 		},
 		isYourTweet: async (root, args) => {
@@ -181,8 +192,9 @@ const resolvers = {
 		}
 	},
 	Mutation: {
-		createUser: async (root, args) => {
+		createUser: async (root, args, {dataSources}) => {
 			const email = args.email
+			const password = args.password
 			const result = await request_email_user_server(email)
 			if (result.data.data.getEmailUserServer != null && result.data.data.getEmailUserServer != undefined) {
 				if (result.data.data.getEmailUserServer.email == email) {
@@ -194,14 +206,15 @@ const resolvers = {
 				expiresIn: "30d"
 			}
 			const hashed_password = jwt.sign({password: args.password}, SECRET_KEY, option)
-			const user = {id: user_id, email: email, password: args.password}
-			const user_output = {id: user_id, hashed_password, email }
-			users = [...users, user]
-			console.log(user_output)
-			user_id ++
+			const user = await dataSources.User.create(email, password)
+			const user_output_before = user.dataValues
+			// const user = {id: user_id, email: email, password: args.password}
+			const user_output = {id: user_output_before.id, hashed_password, email }
+			// users = [...users, user]
+			// user_id ++
 			return user_output
 		},
-		updateUser: async (root, args) => {
+		updateUser: async (root, args, {dataSources}) => {
 			const email = args.email
 			const hash = args.hash
 			const result = await request_current_user(email, hash)
@@ -210,29 +223,33 @@ const resolvers = {
 			if (result.data.data.getCurrentUser == null || result.data.data.getCurrentUser == undefined) {
 				return null 
 			} else {
-				let user = users.find((u) => u.email == email)
+				// let user = users.find((u) => u.email == email)
+				const current_user = await dataSources.User.findByEmail(email)
+				const current_user_id = current_user.dataValues.id
 				const firstName = args.firstName
 				const lastName = args.lastName
-				console.log(firstName, lastName)
-				user = Object.assign({}, user, {firstName, lastName})
-				users = users.map((u) => u.email == email ? user : u)
+				const user = dataSources.User.update(current_user_id, firstName, lastName)
+				// user = Object.assign({}, user, {firstName, lastName})
+				// users = users.map((u) => u.email == email ? user : u)
 				return user
 			}
 		},
-		uploadUserImage : async (root, {file, email, hash}) => {
+		uploadUserImage : async (root, {file, email, hash}, {dataSources}) => {
 			const result = await request_current_user(email, hash)
 			if (result.data.data.getCurrentUser == null || result.data.data.getCurrentUser == undefined) {
 				return null 
 			}
-			const user = users.find((u) => u.email == email)
+			// const user = users.find((u) => u.email == email)
+			const current_user = await dataSources.User.findByEmail(email)
+			const current_user_id = current_user.dataValues.id
 			const { createReadStream, filename, mimetype, encording } = await file
 			const bucket = storage.bucket("apollo_twitter")
-			const file_path = user.id + "/" + filename
+			const file_path = current_user_id + "/" + filename
 			await createReadStream().pipe(bucket.file(file_path).createWriteStream({}))
 			const fileUrl = "https://storage.googleapis.com/apollo_twitter/" + file_path
 			const file_output = {fileName: filename, fileUrl}
-			user.image_url = fileUrl
-			users = users.map((u) => u.id == user.id ? user : u)
+
+			const user = dataSources.User.updateImage(current_user_id, fileUrl)
 			return file_output
 		},
 		signInUser: async (root, args) => {
@@ -254,7 +271,7 @@ const resolvers = {
 			console.log(user_output)
 			return user_output
 		},
-		createTweet: async (root, args) => {
+		createTweet: async (root, args, {dataSources}) => {
 			const email = args.email
 			const hash = args.hash
 			const content = args.content
@@ -263,13 +280,7 @@ const resolvers = {
 			if (user_result.data.data.getCurrentUser == null || user_result.data.data.getCurrentUser == undefined) {
 				return null 
 			} else {
-				const tweet = {
-					id: tweet_id,
-					user_id: user_result.data.data.getCurrentUser.id,
-					content,
-				}
-				tweets = [...tweets, tweet]
-				tweet_id ++
+				const tweet = dataSources.Tweet.create(user_result.data.data.getCurrentUser.id, content)
 				return tweet
 			}
 		},
@@ -286,7 +297,7 @@ const resolvers = {
 				return false
 			}
 			if (tweet_result.data.data.user_id == user_result.data.data.id) {
-				tweets = tweets.filter((t) => t.id != tweet_id)
+				// tweets = tweets.filter((t) => t.id != tweet_id)
 				return true
 			} else {
 				return false

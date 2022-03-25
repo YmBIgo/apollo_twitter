@@ -36,7 +36,7 @@ export class User extends DataSource {
 		user.save()
 		return user
 	}
-	async create(user_id, content) {
-		return this.store.users.create({user_id, content})
+	async create(email, password) {
+		return this.store.users.create({email, password})
 	}
 }
